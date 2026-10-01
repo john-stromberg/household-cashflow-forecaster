@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Household Cashflow Forecaster</title>
+  <style>
+    body { font-family: Segoe UI, Arial, sans-serif; margin: 24px; }
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(280px, 1fr)); gap: 12px; }
+    input { width: 100%; padding: 8px; box-sizing: border-box; }
+    label { font-size: 12px; color: #444; display: block; margin-bottom: 4px; }
+    .checkboxes { margin-top: 12px; }
+    button { margin-top: 12px; padding: 10px 14px; }
+    pre { background: #111; color: #eee; padding: 12px; }
+  </style>
+</head>
+<body>
+  <h1>Household Cashflow Forecaster</h1>
+  <p>Quarterly/yearly liquidity forecast with stress toggles.</p>
+
+  <div class="grid">
+    <div><label>Household Name</label><input id="householdName" value="Anderson Family" /></div>
+    <div><label>Years</label><input id="years" type="number" value="3" /></div>
+    <div><label>Starting Liquidity</label><input id="startingLiquidity" type="number" value="350000" /></div>
+    <div><label>Quarterly Income</label><input id="quarterlyIncome" type="number" value="95000" /></div>
+    <div><label>Quarterly Spending</label><input id="quarterlySpending" type="number" value="78000" /></div>
+    <div><label>Quarterly Contribution</label><input id="quarterlyContribution" type="number" value="12000" /></div>
+  </div>
+
+  <div class="checkboxes">
+    <label><input id="stressMarketDrop" type="checkbox" /> Stress: Market Drop</label>
+    <label><input id="stressInflationSpike" type="checkbox" /> Stress: Inflation Spike</label>
+    <label><input id="stressUnexpectedExpense" type="checkbox" /> Stress: Unexpected Expense</label>
+  </div>
+
+  <button id="runBtn">Run Forecast</button>
+  <pre id="output">Waiting...</pre>
+
+  <script>
+    document.getElementById('runBtn').addEventListener('click', async () => {
+      const payload = {
+        householdName: document.getElementById('householdName').value,
+        years: parseInt(document.getElementById('years').value, 10),
+        startingLiquidity: parseFloat(document.getElementById('startingLiquidity').value),
+        quarterlyIncome: parseFloat(document.getElementById('quarterlyIncome').value),
+        quarterlySpending: parseFloat(document.getElementById('quarterlySpending').value),
+        expectedQuarterlyContribution: parseFloat(document.getElementById('quarterlyContribution').value),
+        stressMarketDrop: document.getElementById('stressMarketDrop').checked,
+        stressInflationSpike: document.getElementById('stressInflationSpike').checked,
+        stressUnexpectedExpense: document.getElementById('stressUnexpectedExpense').checked
+      };
+
+      const res = await fetch('/api/cashflow-forecast/run', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json();
+      document.getElementById('output').textContent = JSON.stringify(data, null, 2);
+    });
+  </script>
+</body>
+</html>
